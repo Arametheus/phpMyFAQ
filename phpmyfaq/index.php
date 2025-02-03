@@ -51,6 +51,31 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+
+$encryptionKey = 'hXoxc0MLpAnZoIWkvwj//a79AjnWpmFg+f2P6Hk32kw=';
+$token = $_GET['token'] ?? null;
+
+//echo $token;
+
+$decodedToken = json_decode($token, true);
+
+// Get the base64-decoded cipherText and IV
+$cipherText = base64_decode($decodedToken['cipher_text']);
+$iv = base64_decode($decodedToken['iv']);
+
+// Decrypt the cipherText
+$decrypted = openssl_decrypt($cipherText, 'AES-256-CBC', $encryptionKey, 0, $iv);
+$_SERVER['REMOTE_USER'] = null;
+
+if ($decrypted === false) {
+   // echo 'Decryption failed: ' . openssl_error_string();
+} else {
+        //print_r($decrypted);
+        $userData = json_decode($decrypted, true);
+//      print_r($userData);
+        $_SERVER['REMOTE_USER'] = $userData['user_id']; // or email
+}
+
 //
 // Define the named constant used as a check by any included PHP file
 //
